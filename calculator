@@ -1,0 +1,32 @@
+class Calculator(object):
+    def evaluate(self, string: str) -> float:
+        """Does a calculation from a string eg. '(1 + 2) * 2' -> 6"""
+
+        # the regex runs anything inside () trough the function again
+        # replaces it with the result eg. ((3 + 1)) -> ((4))
+        # this is asuming the imput is correct (regex will match everything)
+        _str = re.sub(r'\(.+\)',
+                      lambda x: str(self.evaluate(x.group(0)[2:-2])), # splice removes ()
+                      string)
+
+
+        # holding the different operations in a list of dicts
+        # list so that we get the right order of operations
+        # dict so that we can easily get the right function
+        operations_by_order = [{'*': lambda x, y: x*y, '/': lambda x, y: x/y },
+                              {'-': lambda x, y: x-y, '+': lambda x, y: x+y }]
+        arr = _str.split(' ')
+        for ordr in operations_by_order:
+            i = 0
+            while i<len(arr):
+                try:
+                    arr[i-1] = ordr[arr[i]](float(arr[i-1]), float(arr[i+1]))
+                    # removing the operator and other number
+                    arr.pop(i+1)
+                    arr.pop(i)
+                    i -= 1 # we removed the current one so we need to move 'back'
+                except KeyError: # arr[i] is not an operator in current order
+                    pass
+                i += 1
+
+        return float(arr[0])
